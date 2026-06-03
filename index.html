@@ -73,16 +73,18 @@
   }
 
   /* hint that appears after 3s if the user hasn't hovered the timeline */
+  .hints {
+    margin-bottom: 42px;
+  }
   .hint {
     color: var(--ink-faint);
     font-size: 13px;
     font-style: italic;
-    margin-bottom: 42px;
     opacity: 0;
     transition: opacity 0.5s ease;
   }
+  .hint + .hint { margin-top: 3px; }
   .hint.show { opacity: 1; }
-  .hint.hide { opacity: 0; }
 
   /* ===== sections ===== */
   section {
@@ -222,6 +224,34 @@
     border-radius: 2px;
   }
 
+  /* ===== memory photos: revealed on click, then pinned in place ===== */
+  .memory-photo {
+    position: absolute;
+    width: 175px;
+    z-index: 4;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9) translateY(8px);
+    transform-origin: center top;
+    transition: opacity 0.35s ease, transform 0.42s cubic-bezier(0.2, 0.9, 0.3, 1);
+    pointer-events: none;
+  }
+  .entry.revealed .memory-photo {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+  .memory-photo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 8px 28px rgba(26, 22, 18, 0.18);
+    background: var(--popup-bg);
+  }
+
   /* ===== contact ===== */
   .contact-links {
     display: flex;
@@ -316,8 +346,21 @@
 
     .entry.now::before { height: 28px; }
     .bio { margin-bottom: 56px; }
-    .hint { display: none; }
+    .hints { display: none; }
     section { margin-bottom: 48px; }
+
+    /* photos drop inline below each entry's text on touch screens */
+    .memory-photo {
+      position: static;
+      left: auto !important;
+      top: auto !important;
+      width: 100%;
+      max-width: 320px;
+      grid-column: 3;
+      margin-top: 10px;
+      transform: scale(0.96) translateY(6px);
+    }
+    .entry.revealed .memory-photo { transform: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -337,7 +380,10 @@
 
 <p class="bio">A 19 year old trying to build great things. Currently in nyc.</p>
 
-<p class="hint" id="hint">Try moving your mouse over the timeline.</p>
+<div class="hints">
+  <p class="hint" id="hint-move">Try moving your mouse over the timeline.</p>
+  <p class="hint" id="hint-click">Try clicking the timeline.</p>
+</div>
 
 <!-- ===========================================================
      TIMELINE
@@ -357,6 +403,9 @@
       <div class="title">The Starter</div>
       <div class="desc">Posted my first YouTube video at the age of 13. Created over 100 Among Us videos that averaged 50 views.</div>
     </div>
+    <div class="memory-photo" style="left: 150px; top: 2px;">
+      <img src="images/pic1.gif" alt="Aug. 2020 — The Starter" loading="lazy">
+    </div>
   </div>
 
   <div class="entry" tabindex="0">
@@ -364,6 +413,9 @@
     <div class="popup">
       <div class="title">The Entree</div>
       <div class="desc">Edited my first viral post gaining over 17M views, the second most viewed Hell's Kitchen video of all time. Now a creator with 50k+ total followers.</div>
+    </div>
+    <div class="memory-photo" style="left: 232px; top: -8px;">
+      <img src="images/pic2.jpg" alt="Oct. 2020 — The Entree" loading="lazy">
     </div>
   </div>
 
@@ -373,6 +425,9 @@
       <div class="title">Stuck In The Backrooms</div>
       <div class="desc">Enrolled into UMich. Explored software, finance, and quant, joined a business fraternity, went on a dating show, got rejected from every top club and was invited back as a speaker.</div>
     </div>
+    <div class="memory-photo" style="left: 138px; top: 4px;">
+      <img src="images/pic3.jpg" alt="Aug. 2024 — Stuck In The Backrooms" loading="lazy">
+    </div>
   </div>
 
   <div class="entry" tabindex="0">
@@ -380,6 +435,9 @@
     <div class="popup">
       <div class="title">In the Weeds</div>
       <div class="desc">Built an AI agent @ AT&T that generated a brainrot Minecraft parkour video on command. Found out I hated SWE.</div>
+    </div>
+    <div class="memory-photo" style="left: 248px; top: -6px;">
+      <img src="images/pic4.jpg" alt="May 2025 — In the Weeds" loading="lazy">
     </div>
   </div>
 
@@ -389,6 +447,9 @@
       <div class="title">UGC Demon</div>
       <div class="desc">Ammassed 15k+ followers and 10m+ views as a creator @ Turbo AI. Became a director soon after. Officially changed my career trajectory.</div>
     </div>
+    <div class="memory-photo" style="left: 168px; top: 6px;">
+      <img src="images/pic5.png" alt="July 2025 — UGC Demon" loading="lazy">
+    </div>
   </div>
 
   <div class="entry" tabindex="0">
@@ -397,6 +458,9 @@
       <div class="title">Escaped the Backrooms</div>
       <div class="desc">Temporarily on leave to try new things. Currently UGC Lead/Growth @ Fizz.</div>
     </div>
+    <div class="memory-photo" style="left: 214px; top: -4px;">
+      <img src="images/pic6.jpeg" alt="Apr. 2026 — Escaped the Backrooms" loading="lazy">
+    </div>
   </div>
 
   <div class="entry now" tabindex="0">
@@ -404,6 +468,9 @@
     <div class="popup">
       <div class="title">Mogging</div>
       <div class="desc">Doing anything I come across for the love of the game.</div>
+    </div>
+    <div class="memory-photo" style="left: 184px; top: 2px;">
+      <img src="images/pic7.png" alt="Now — Mogging" loading="lazy">
     </div>
   </div>
 </section>
@@ -460,29 +527,70 @@
 <script>
 (function() {
   const isMobile = window.matchMedia('(max-width: 640px)').matches;
+  const entries  = Array.from(document.querySelectorAll('.entry'));
+  const timeline = document.querySelector('section');   // first section = timeline
 
-  /* ===== hint: appears after 3s if user hasn't hovered any entry ===== */
-  const hint = document.getElementById('hint');
-  let hintDismissed = false;
-  let hintTimer;
+  const hintMove  = document.getElementById('hint-move');
+  const hintClick = document.getElementById('hint-click');
 
-  if (hint && !isMobile) {
-    hintTimer = setTimeout(() => {
-      if (!hintDismissed) hint.classList.add('show');
-    }, 1250);
+  const total = entries.length;
+  let revealedCount = 0;
+  let allRevealed = false;
+  let photoZ = 4;                       // stack most-recently revealed photo on top
+  let firstMoveTimer, firstClickTimer, idleTimer;
+
+  function showHint(el) { if (el) el.classList.add('show'); }
+  function hideHint(el) { if (el) el.classList.remove('show'); }
+  function showHints() {
+    showHint(hintMove);
+    if (!allRevealed) showHint(hintClick);   // "try clicking" is gone once all photos shown
+  }
+  function hideHints() { hideHint(hintMove); hideHint(hintClick); }
+
+  // engaging the timeline (moving over it / clicking) hides the hints
+  function engageTimeline() {
+    clearTimeout(firstMoveTimer);
+    clearTimeout(firstClickTimer);
+    clearTimeout(idleTimer);
+    hideHints();
+  }
+  // doing neither for 8s brings the hints back
+  function startIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(showHints, 8000);
   }
 
-  function dismissHint() {
-    if (hintDismissed || !hint) return;
-    hintDismissed = true;
-    clearTimeout(hintTimer);
-    hint.classList.remove('show');
-    hint.classList.add('hide');
+  /* ===== click a date to reveal its memory photo (resets on refresh) ===== */
+  function revealEntry(entry) {
+    if (entry.classList.contains('revealed')) return;
+    entry.classList.add('revealed');
+    const photo = entry.querySelector('.memory-photo');
+    if (photo) photo.style.zIndex = String(++photoZ);
+    revealedCount++;
+    if (revealedCount >= total) {
+      allRevealed = true;
+      hideHint(hintClick);              // never prompt to click again
+    }
   }
 
-  document.querySelectorAll('.entry').forEach(e => {
-    e.addEventListener('mouseenter', dismissHint);
+  entries.forEach(entry => {
+    entry.addEventListener('click', () => { revealEntry(entry); engageTimeline(); });
+    entry.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); revealEntry(entry); engageTimeline(); }
+    });
   });
+
+  /* ===== hints (desktop only): "try moving" at 1.25s, "try clicking" at 4s ===== */
+  if (!isMobile && (hintMove || hintClick)) {
+    firstMoveTimer  = setTimeout(() => showHint(hintMove), 1250);
+    firstClickTimer = setTimeout(() => { if (!allRevealed) showHint(hintClick); }, 4000);
+
+    if (timeline) {
+      timeline.addEventListener('mouseenter', engageTimeline);
+      timeline.addEventListener('mousemove', engageTimeline);
+      timeline.addEventListener('mouseleave', startIdle);
+    }
+  }
 
   /* ===== contact: scroll down (default) AND open the visitor's mail app ===== */
   const contactLink = document.getElementById('contact-link');
