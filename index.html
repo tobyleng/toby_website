@@ -346,7 +346,9 @@
 
     .entry.now::before { height: 28px; }
     .bio { margin-bottom: 56px; }
-    .hints { display: none; }
+    /* mobile has no hover: drop "try moving", keep "try clicking" permanently visible */
+    #hint-move { display: none; }
+    #hint-click { opacity: 1; }
     section { margin-bottom: 48px; }
 
     /* photos drop inline below each entry's text on touch screens */
@@ -358,9 +360,10 @@
       max-width: 320px;
       grid-column: 3;
       margin-top: 10px;
+      display: none;            /* don't reserve space until revealed */
       transform: scale(0.96) translateY(6px);
     }
-    .entry.revealed .memory-photo { transform: none; }
+    .entry.revealed .memory-photo { display: block; transform: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
