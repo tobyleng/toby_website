@@ -12,17 +12,6 @@
     --ink-faint: #9a8e7a;
     --popup-bg: #fdf9ef;   /* slightly lighter than bone for the textbox */
     --hairline: rgba(26, 22, 18, 0.12);   /* faint divider lines */
-    color-scheme: light;
-  }
-
-  [data-theme="dark"] {
-    --bone: #161310;        /* page background */
-    --offblack: #ece6db;    /* primary text */
-    --ink-soft: #b3a48b;
-    --ink-faint: #7d7160;
-    --popup-bg: #211c16;    /* slightly lighter than bg for the textbox */
-    --hairline: rgba(236, 230, 219, 0.13);
-    color-scheme: dark;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +31,6 @@
     margin: 0 auto;
     padding: 64px 24px 0;
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   a {
@@ -57,7 +45,7 @@
   header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     margin-bottom: 6px;
   }
   header h1 {
@@ -67,44 +55,8 @@
   }
   nav {
     display: flex;
-    align-items: center;
     gap: 18px;
   }
-
-  /* ===== dark-mode toggle ===== */
-  .theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    background: none;
-    color: var(--ink-soft);
-    cursor: pointer;
-    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .theme-toggle:hover {
-    color: var(--offblack);
-    background: var(--popup-bg);
-    border-color: var(--hairline);
-  }
-  .theme-toggle:focus-visible {
-    outline: 1.5px dashed var(--ink-soft);
-    outline-offset: 3px;
-  }
-  .theme-toggle svg {
-    width: 16px;
-    height: 16px;
-  }
-  /* show moon in light mode (click → dark), sun in dark mode (click → light) */
-  .theme-toggle .icon-sun { display: none; }
-  .theme-toggle .icon-moon { display: block; }
-  [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-  [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
   nav a {
     text-decoration: none;
     color: var(--ink-soft);
@@ -379,16 +331,6 @@
     .entry::after { transition: none; }
   }
 </style>
-<script>
-  /* set theme before first paint to avoid a flash */
-  (function() {
-    try {
-      var t = localStorage.getItem('theme');
-      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-    } catch (e) {}
-  })();
-</script>
 </head>
 <body>
 
@@ -397,18 +339,6 @@
   <nav>
     <a href="#work">work</a>
     <a href="#contact">contact</a>
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    </button>
   </nav>
 </header>
 
@@ -541,18 +471,6 @@
 <script>
 (function() {
   const isMobile = window.matchMedia('(max-width: 640px)').matches;
-
-  /* ===== dark mode toggle ===== */
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      if (next === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-      else document.documentElement.removeAttribute('data-theme');
-      try { localStorage.setItem('theme', next); } catch (e) {}
-    });
-  }
 
   /* ===== hint: appears after 3s if user hasn't hovered any entry ===== */
   const hint = document.getElementById('hint');
