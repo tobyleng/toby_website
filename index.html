@@ -162,8 +162,7 @@
     transition: width 0.18s ease, height 0.18s ease;
   }
   .entry:hover::after,
-  .entry:focus-visible::after,
-  .entry.popup-flash::after {
+  .entry:focus-visible::after {
     width: 13px;
     height: 13px;
   }
@@ -187,15 +186,10 @@
     z-index: 10;
   }
   .entry:hover .popup,
-  .entry:focus-visible .popup,
-  .entry.popup-flash .popup {
+  .entry:focus-visible .popup {
     opacity: 1;
     transform: scale(1) translateY(0);
     pointer-events: auto;
-  }
-  /* slower, more graceful fade-out when auto-flash dismisses itself */
-  .entry.popup-fading .popup {
-    transition: opacity 0.5s ease, transform 0.5s ease;
   }
 
   .popup .title {
@@ -337,7 +331,6 @@
 <header>
   <h1>Toby Leng</h1>
   <nav>
-    <a href="#work">work</a>
     <a href="#contact">contact</a>
   </nav>
 </header>
@@ -352,10 +345,6 @@
      - Hover an entry → textbox with the experience pops up
      - On mobile, the text shows inline (no hover on touch screens)
      - The "Now" entry's vertical line ends at its dot
-     
-     ⚠️ The "work" nav button currently scrolls to the 3rd entry
-        (the one with id="work"). To change where it lands,
-        MOVE the id="work" attribute to whichever entry you want.
      =========================================================== -->
 <section>
   <div class="label">Timeline</div>
@@ -365,7 +354,7 @@
   <div class="entry" tabindex="0">
     <div class="date">Aug. 2020</div>
     <div class="popup">
-      <div class="title">First YouTube Post</div>
+      <div class="title">The Starter</div>
       <div class="desc">Posted my first YouTube video at the age of 13. Created over 100 Among Us videos that averaged 50 views.</div>
     </div>
   </div>
@@ -373,7 +362,7 @@
   <div class="entry" tabindex="0">
     <div class="date">Oct. 2020</div>
     <div class="popup">
-      <div class="title">First Taste of Virality</div>
+      <div class="title">The Entree</div>
       <div class="desc">Edited my first viral post gaining over 17M views, the second most viewed Hell's Kitchen video of all time. Now a creator with 50k+ total followers.</div>
     </div>
   </div>
@@ -381,8 +370,8 @@
   <div class="entry" tabindex="0">
     <div class="date">Aug. 2024</div>
     <div class="popup">
-      <div class="title">Enrolled into UMich</div>
-      <div class="desc">Explored software, finance, and quant, joined a business fraternity, went on a dating show, got rejected from every top club and was invited back as a speaker.</div>
+      <div class="title">Stuck In The Backrooms</div>
+      <div class="desc">Enrolled into UMich. Explored software, finance, and quant, joined a business fraternity, went on a dating show, got rejected from every top club and was invited back as a speaker.</div>
     </div>
   </div>
 
@@ -394,7 +383,7 @@
     </div>
   </div>
 
-  <div class="entry" tabindex="0" id="work">
+  <div class="entry" tabindex="0">
     <div class="date">July 2025</div>
     <div class="popup">
       <div class="title">UGC @ Turbo AI</div>
@@ -405,7 +394,7 @@
   <div class="entry" tabindex="0">
     <div class="date">Apr. 2026</div>
     <div class="popup">
-      <div class="title">"Dropped Out"</div>
+      <div class="title">Escaped the Backrooms</div>
       <div class="desc">Temporarily on leave to try new things. Currently UGC Lead/Growth @ Fizz.</div>
     </div>
   </div>
@@ -413,7 +402,7 @@
   <div class="entry now" tabindex="0">
     <div class="date">Now</div>
     <div class="popup">
-      <div class="title">Building</div>
+      <div class="title">Mogging</div>
       <div class="desc">Doing anything I come across for the love of the game.</div>
     </div>
   </div>
@@ -494,37 +483,6 @@
   document.querySelectorAll('.entry').forEach(e => {
     e.addEventListener('mouseenter', dismissHint);
   });
-
-  /* ===== work flash: auto-opens the linked entry's popup for 3s ===== */
-  let flashTimer, fadeTimer;
-  function flashWorkPopup() {
-    const target = document.getElementById('work');
-    if (!target) return;
-    clearTimeout(flashTimer);
-    clearTimeout(fadeTimer);
-    target.classList.remove('popup-fading');
-    target.classList.add('popup-flash');
-    dismissHint();
-
-    // after 2.5s, swap to fading mode (slower transition), then drop after 3s total
-    flashTimer = setTimeout(() => {
-      target.classList.add('popup-fading');
-      target.classList.remove('popup-flash');
-      fadeTimer = setTimeout(() => target.classList.remove('popup-fading'), 600);
-    }, 1000);
-  }
-
-  const workLink = document.querySelector('nav a[href="#work"]');
-  if (workLink) {
-    workLink.addEventListener('click', () => {
-      setTimeout(flashWorkPopup, 120);   // brief delay so scroll begins first
-    });
-  }
-
-  // also flash if someone lands on the page with #work already in the URL
-  if (window.location.hash === '#work') {
-    setTimeout(flashWorkPopup, 400);
-  }
 })();
 </script>
 
