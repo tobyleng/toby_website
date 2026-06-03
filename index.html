@@ -331,7 +331,7 @@
 <header>
   <h1>Toby Leng</h1>
   <nav>
-    <a href="#contact">contact</a>
+    <a href="#contact" id="contact-link">contact</a>
   </nav>
 </header>
 
@@ -483,6 +483,15 @@
   document.querySelectorAll('.entry').forEach(e => {
     e.addEventListener('mouseenter', dismissHint);
   });
+
+  /* ===== contact: scroll down (default) AND open the visitor's mail app ===== */
+  const contactLink = document.getElementById('contact-link');
+  if (contactLink) {
+    contactLink.addEventListener('click', () => {
+      // let the #contact smooth-scroll start first, then trigger the mail composer
+      setTimeout(() => { window.location.href = 'mailto:tobyjleng@gmail.com'; }, 350);
+    });
+  }
 })();
 </script>
 
