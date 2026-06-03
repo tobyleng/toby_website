@@ -185,7 +185,7 @@
     transform-origin: left center;
     transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
     pointer-events: none;
-    z-index: 10;
+    z-index: 100;   /* always above revealed memory photos */
   }
   .entry:hover .popup,
   .entry:focus-visible .popup {
@@ -403,7 +403,7 @@
       <div class="title">The Starter</div>
       <div class="desc">Posted my first YouTube video at the age of 13. Created over 100 Among Us videos that averaged 50 views.</div>
     </div>
-    <div class="memory-photo" style="left: 150px; top: 2px;">
+    <div class="memory-photo" style="left: 250px; top: 0;">
       <img src="images/pic1.gif" alt="Aug. 2020 — The Starter" loading="lazy">
     </div>
   </div>
@@ -414,7 +414,7 @@
       <div class="title">The Entree</div>
       <div class="desc">Edited my first viral post gaining over 17M views, the second most viewed Hell's Kitchen video of all time. Now a creator with 50k+ total followers.</div>
     </div>
-    <div class="memory-photo" style="left: 232px; top: -8px;">
+    <div class="memory-photo" style="left: 380px; top: 14px;">
       <img src="images/pic2.jpg" alt="Oct. 2020 — The Entree" loading="lazy">
     </div>
   </div>
@@ -425,7 +425,7 @@
       <div class="title">Stuck In The Backrooms</div>
       <div class="desc">Enrolled into UMich. Explored software, finance, and quant, joined a business fraternity, went on a dating show, got rejected from every top club and was invited back as a speaker.</div>
     </div>
-    <div class="memory-photo" style="left: 138px; top: 4px;">
+    <div class="memory-photo" style="left: 244px; top: 8px;">
       <img src="images/pic3.jpg" alt="Aug. 2024 — Stuck In The Backrooms" loading="lazy">
     </div>
   </div>
@@ -436,7 +436,7 @@
       <div class="title">In the Weeds</div>
       <div class="desc">Built an AI agent @ AT&T that generated a brainrot Minecraft parkour video on command. Found out I hated SWE.</div>
     </div>
-    <div class="memory-photo" style="left: 248px; top: -6px;">
+    <div class="memory-photo" style="left: 384px; top: -4px;">
       <img src="images/pic4.jpg" alt="May 2025 — In the Weeds" loading="lazy">
     </div>
   </div>
@@ -447,7 +447,7 @@
       <div class="title">UGC Demon</div>
       <div class="desc">Ammassed 15k+ followers and 10m+ views as a creator @ Turbo AI. Became a director soon after. Officially changed my career trajectory.</div>
     </div>
-    <div class="memory-photo" style="left: 168px; top: 6px;">
+    <div class="memory-photo" style="left: 256px; top: 10px;">
       <img src="images/pic5.png" alt="July 2025 — UGC Demon" loading="lazy">
     </div>
   </div>
@@ -458,7 +458,7 @@
       <div class="title">Escaped the Backrooms</div>
       <div class="desc">Temporarily on leave to try new things. Currently UGC Lead/Growth @ Fizz.</div>
     </div>
-    <div class="memory-photo" style="left: 214px; top: -4px;">
+    <div class="memory-photo" style="left: 378px; top: 2px;">
       <img src="images/pic6.jpeg" alt="Apr. 2026 — Escaped the Backrooms" loading="lazy">
     </div>
   </div>
@@ -469,7 +469,7 @@
       <div class="title">Mogging</div>
       <div class="desc">Doing anything I come across for the love of the game.</div>
     </div>
-    <div class="memory-photo" style="left: 184px; top: 2px;">
+    <div class="memory-photo" style="left: 250px; top: 6px;">
       <img src="images/pic7.png" alt="Now — Mogging" loading="lazy">
     </div>
   </div>
@@ -554,10 +554,10 @@
     clearTimeout(idleTimer);
     hideHints();
   }
-  // doing neither for 8s brings the hints back
+  // doing neither for 5s brings the hints back
   function startIdle() {
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(showHints, 8000);
+    idleTimer = setTimeout(showHints, 5000);
   }
 
   /* ===== click a date to reveal its memory photo (resets on refresh) ===== */
@@ -580,10 +580,10 @@
     });
   });
 
-  /* ===== hints (desktop only): "try moving" at 1.25s, "try clicking" at 4s ===== */
+  /* ===== hints (desktop only): "try moving" at 1.25s, "try clicking" at 3s ===== */
   if (!isMobile && (hintMove || hintClick)) {
     firstMoveTimer  = setTimeout(() => showHint(hintMove), 1250);
-    firstClickTimer = setTimeout(() => { if (!allRevealed) showHint(hintClick); }, 4000);
+    firstClickTimer = setTimeout(() => { if (!allRevealed) showHint(hintClick); }, 3000);
 
     if (timeline) {
       timeline.addEventListener('mouseenter', engageTimeline);
