@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Toby Leng</title>
+<style>
+  :root {
+    --bone: #efeae0;
+    --offblack: #1a1612;
+    --ink-soft: #6b5e4d;
+    --ink-faint: #9a8e7a;
+    --popup-bg: #fdf9ef;   /* slightly lighter than bone for the textbox */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 32px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--offblack);
+    background: var(--bone);
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 64px 24px 120px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--offblack);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  a:hover { color: var(--ink-soft); }
+
+  /* ===== header ===== */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  nav {
+    display: flex;
+    gap: 18px;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+  nav a:hover {
+    color: var(--offblack);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bio {
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  /* hint that appears after 3s if the user hasn't hovered the timeline */
+  .hint {
+    color: var(--ink-faint);
+    font-size: 13px;
+    font-style: italic;
+    margin-bottom: 42px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .hint.show { opacity: 1; }
+  .hint.hide { opacity: 0; }
+
+  /* ===== sections ===== */
+  section {
+    margin-bottom: 64px;
+  }
+  section:last-child { margin-bottom: 0; }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 28px;
+  }
+
+  /* =========================================================
+     TIMELINE
+     - Each entry shows only the DATE by default
+     - On hover, a popup textbox zooms up with title + description
+     - On mobile (no hover), text appears inline
+     ========================================================= */
+  .entry {
+    display: grid;
+    grid-template-columns: 90px 36px 1fr;
+    position: relative;
+    padding: 26px 0;
+    min-height: 56px;
+    scroll-margin-top: 32px;
+    max-width: 400px;       /* hover area width — lower this for an even thinner activation zone */
+  }
+
+  .entry .date {
+    text-align: right;
+    padding-right: 22px;
+    padding-top: 1px;
+    font-size: 14px;
+    color: var(--offblack);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* vertical line — spans the full height of every entry */
+  .entry::before {
+    content: '';
+    position: absolute;
+    left: 108px;          /* center of spine column: 90 + 36/2 = 108 */
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--offblack);
+    transform: translateX(-50%);
+  }
+
+  /* the dot — grows on hover for visual feedback */
+  .entry::after {
+    content: '';
+    position: absolute;
+    left: 108px;
+    top: 32px;
+    width: 9px;
+    height: 9px;
+    background: var(--offblack);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    transition: width 0.18s ease, height 0.18s ease;
+  }
+  .entry:hover::after,
+  .entry:focus-visible::after,
+  .entry.popup-flash::after {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* the popup textbox — hidden by default, zooms in on hover */
+  .entry .popup {
+    position: absolute;
+    left: 130px;
+    top: 18px;
+    width: 300px;
+    max-width: calc(100% - 140px);
+    background: var(--popup-bg);
+    border: 1.5px solid var(--offblack);
+    padding: 12px 16px 14px;
+    border-radius: 2px;
+    opacity: 0;
+    transform: scale(0.92) translateY(4px);
+    transform-origin: left center;
+    transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .entry:hover .popup,
+  .entry:focus-visible .popup,
+  .entry.popup-flash .popup {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+  /* slower, more graceful fade-out when auto-flash dismisses itself */
+  .entry.popup-fading .popup {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .popup .title {
+    font-weight: 500;
+    color: var(--offblack);
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+  .popup .desc {
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+
+  /* Now entry: bolder date, line stops at the dot */
+  .entry.now .date {
+    font-weight: 600;
+  }
+  .entry.now::before {
+    bottom: auto;
+    height: 36px;
+  }
+
+  /* keyboard focus indicator */
+  .entry:focus { outline: none; }
+  .entry:focus-visible {
+    outline: 1.5px dashed var(--ink-soft);
+    outline-offset: 6px;
+    border-radius: 2px;
+  }
+
+  /* ===== contact ===== */
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .contact-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--offblack);
+    width: fit-content;
+  }
+  .contact-links svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--offblack);
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+  }
+  .contact-links a:hover svg { opacity: 1; }
+  .contact-links a .text {
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+    transition: border-color 0.15s ease;
+  }
+  .contact-links a:hover .text {
+    border-bottom-color: var(--offblack);
+  }
+
+  /* ===== fun facts ===== */
+  .fun-facts {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fun-facts li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--offblack);
+  }
+  .fun-facts li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--ink-faint);
+  }
+
+  /* ===== mobile: popup becomes inline (no hover on touch) ===== */
+  @media (max-width: 640px) {
+    body { padding: 40px 18px 80px; font-size: 14.5px; }
+
+    .entry {
+      grid-template-columns: 70px 28px 1fr;
+      padding: 18px 0;
+    }
+    .entry .date { padding-right: 14px; font-size: 13px; }
+    .entry::before, .entry::after { left: 84px; }
+    .entry::after { top: 24px; }
+
+    .entry .popup {
+      position: static;
+      width: auto;
+      max-width: none;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      border: none;
+      background: none;
+      padding: 0;
+      grid-column: 3;
+      align-self: start;
+      padding-left: 18px;
+      padding-top: 1px;
+    }
+
+    .entry.now::before { height: 28px; }
+    .bio { margin-bottom: 56px; }
+    .hint { display: none; }
+    section { margin-bottom: 48px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .entry .popup,
+    .entry::after { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Toby Leng</h1>
+  <nav>
+    <a href="#work">work</a>
+    <a href="#contact">contact</a>
+  </nav>
+</header>
+
+<p class="bio">A 19 year old trying to build great things. Currently in nyc.</p>
+
+<p class="hint" id="hint">Try moving your mouse over the timeline.</p>
+
+<!-- ===========================================================
+     TIMELINE
+     - Each entry shows only the DATE by default
+     - Hover an entry → textbox with the experience pops up
+     - On mobile, the text shows inline (no hover on touch screens)
+     - The "Now" entry's vertical line ends at its dot
+     
+     ⚠️ The "work" nav button currently scrolls to the 3rd entry
+        (the one with id="work"). To change where it lands,
+        MOVE the id="work" attribute to whichever entry you want.
+     =========================================================== -->
+<section>
+  <div class="label">Timeline</div>
+
+  <div class="entry" tabindex="0">
+    <div class="date">Aug. 2020</div>
+    <div class="popup">
+      <div class="title">First YouTube Post</div>
+      <div class="desc">Posted my first YouTube video at the age of 13. Created over 100 Among Us videos that averaged 50 views.</div>
+    </div>
+  </div>
+
+  <div class="entry" tabindex="0">
+    <div class="date">Oct. 2020</div>
+    <div class="popup">
+      <div class="title">First Taste of Virality</div>
+      <div class="desc">Edited my first viral post gaining over 17M views, the second most viewed Hell's Kitchen video of all time. Now a creator with 50k+ total followers.</div>
+    </div>
+  </div>
+
+  <div class="entry" tabindex="0">
+    <div class="date">Aug. 2024</div>
+    <div class="popup">
+      <div class="title">Enrolled into UMich</div>
+      <div class="desc">Joined a business fraternity, went on a dating show, got rejected from every top club, was invited back as a speaker.</div>
+    </div>
+  </div>
+
+  <div class="entry" tabindex="0">
+    <div class="date">May 2025</div>
+    <div class="popup">
+      <div class="title">ML @ AT&T</div>
+      <div class="desc">Built an AI agent @ AT&T that generated a brainrot Minecraft parkour video on command. Found out I hated SWE.</div>
+    </div>
+  </div>
+
+  <div class="entry" tabindex="0" id="work">
+    <div class="date">July 2025</div>
+    <div class="popup">
+      <div class="title">UGC @ Turbo AI</div>
+      <div class="desc">Ammassed 15k+ followers and 10m+ views as a creator. Became a director soon after. Changed my career trajectory.</div>
+    </div>
+  </div>
+
+  <div class="entry" tabindex="0">
+    <div class="date">Apr. 2026</div>
+    <div class="popup">
+      <div class="title">"Dropped Out"</div>
+      <div class="desc">Temporarily on leave to try new things. Currently UGC Lead/Growth @ Fizz.</div>
+    </div>
+  </div>
+
+  <div class="entry now" tabindex="0">
+    <div class="date">Now</div>
+    <div class="popup">
+      <div class="title">Building</div>
+      <div class="desc">Doing anything I come across for the love of the game.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="label">Fun Facts</div>
+  <ul class="fun-facts">
+    <li>Piano player (currently learning Ballade 4)</li>
+    <li>Amateur magician</li>
+    <li>Brainrotted</li>
+  </ul>
+</section>
+
+<section id="contact">
+  <div class="label">Contact</div>
+  <div class="contact-links">
+
+    <a href="https://x.com/tobyjleng">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      <span class="text">x.com/tobyjleng</span>
+    </a>
+
+    <a href="https://instagram.com/toby.lengg">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+      </svg>
+      <span class="text">instagram.com/toby.lengg</span>
+    </a>
+
+    <a href="https://linkedin.com/in/tobyleng">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+      <span class="text">linkedin.com/in/tobyleng</span>
+    </a>
+
+    <a href="mailto:tobyjleng@gmail.com">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span class="text">tobyjleng@gmail.com</span>
+    </a>
+
+  </div>
+</section>
+
+<script>
+(function() {
+  const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
+  /* ===== hint: appears after 3s if user hasn't hovered any entry ===== */
+  const hint = document.getElementById('hint');
+  let hintDismissed = false;
+  let hintTimer;
+
+  if (hint && !isMobile) {
+    hintTimer = setTimeout(() => {
+      if (!hintDismissed) hint.classList.add('show');
+    }, 1250);
+  }
+
+  function dismissHint() {
+    if (hintDismissed || !hint) return;
+    hintDismissed = true;
+    clearTimeout(hintTimer);
+    hint.classList.remove('show');
+    hint.classList.add('hide');
+  }
+
+  document.querySelectorAll('.entry').forEach(e => {
+    e.addEventListener('mouseenter', dismissHint);
+  });
+
+  /* ===== work flash: auto-opens the linked entry's popup for 3s ===== */
+  let flashTimer, fadeTimer;
+  function flashWorkPopup() {
+    const target = document.getElementById('work');
+    if (!target) return;
+    clearTimeout(flashTimer);
+    clearTimeout(fadeTimer);
+    target.classList.remove('popup-fading');
+    target.classList.add('popup-flash');
+    dismissHint();
+
+    // after 2.5s, swap to fading mode (slower transition), then drop after 3s total
+    flashTimer = setTimeout(() => {
+      target.classList.add('popup-fading');
+      target.classList.remove('popup-flash');
+      fadeTimer = setTimeout(() => target.classList.remove('popup-fading'), 600);
+    }, 1000);
+  }
+
+  const workLink = document.querySelector('nav a[href="#work"]');
+  if (workLink) {
+    workLink.addEventListener('click', () => {
+      setTimeout(flashWorkPopup, 120);   // brief delay so scroll begins first
+    });
+  }
+
+  // also flash if someone lands on the page with #work already in the URL
+  if (window.location.hash === '#work') {
+    setTimeout(flashWorkPopup, 400);
+  }
+})();
+</script>
+
+</body>
+</html>
