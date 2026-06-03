@@ -536,7 +536,6 @@
   const total = entries.length;
   let revealedCount = 0;
   let allRevealed = false;
-  let photoZ = 4;                       // stack most-recently revealed photo on top
   let firstMoveTimer, firstClickTimer, idleTimer;
 
   function showHint(el) { if (el) el.classList.add('show'); }
@@ -564,8 +563,6 @@
   function revealEntry(entry) {
     if (entry.classList.contains('revealed')) return;
     entry.classList.add('revealed');
-    const photo = entry.querySelector('.memory-photo');
-    if (photo) photo.style.zIndex = String(++photoZ);
     revealedCount++;
     if (revealedCount >= total) {
       allRevealed = true;
@@ -573,7 +570,10 @@
     }
   }
 
-  entries.forEach(entry => {
+  entries.forEach((entry, i) => {
+    // fixed stacking by timeline order: each photo sits above the previous one
+    const photo = entry.querySelector('.memory-photo');
+    if (photo) photo.style.zIndex = String(5 + i);
     entry.addEventListener('click', () => { revealEntry(entry); engageTimeline(); });
     entry.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); revealEntry(entry); engageTimeline(); }
