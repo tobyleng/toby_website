@@ -403,7 +403,7 @@
       <div class="title">The Starter</div>
       <div class="desc">Posted my first YouTube video at the age of 13. Created over 100 Among Us videos that averaged 50 views.</div>
     </div>
-    <div class="memory-photo" style="left: 250px; top: 0;">
+    <div class="memory-photo" style="left: 250px; top: -8px;">
       <img src="images/pic1.gif" alt="Aug. 2020 — The Starter" loading="lazy">
     </div>
   </div>
@@ -533,40 +533,31 @@
   const hintMove  = document.getElementById('hint-move');
   const hintClick = document.getElementById('hint-click');
 
-  const total = entries.length;
-  let revealedCount = 0;
-  let allRevealed = false;
-  let firstMoveTimer, firstClickTimer, idleTimer;
+  let revealedAny = false;
+  let firstMoveTimer, idleTimer;
 
   function showHint(el) { if (el) el.classList.add('show'); }
   function hideHint(el) { if (el) el.classList.remove('show'); }
-  function showHints() {
-    showHint(hintMove);
-    if (!allRevealed) showHint(hintClick);   // "try clicking" is gone once all photos shown
-  }
-  function hideHints() { hideHint(hintMove); hideHint(hintClick); }
 
-  // engaging the timeline (moving over it / clicking) hides the hints
+  // hovering the timeline hides ONLY the "try moving" hint ("try clicking" stays)
   function engageTimeline() {
     clearTimeout(firstMoveTimer);
-    clearTimeout(firstClickTimer);
     clearTimeout(idleTimer);
-    hideHints();
+    hideHint(hintMove);
   }
-  // doing neither for 5s brings the hints back
+  // leaving the timeline brings the "try moving" hint back after 5s
   function startIdle() {
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(showHints, 5000);
+    idleTimer = setTimeout(() => showHint(hintMove), 5000);
   }
 
   /* ===== click a date to reveal its memory photo (resets on refresh) ===== */
   function revealEntry(entry) {
     if (entry.classList.contains('revealed')) return;
     entry.classList.add('revealed');
-    revealedCount++;
-    if (revealedCount >= total) {
-      allRevealed = true;
-      hideHint(hintClick);              // never prompt to click again
+    if (!revealedAny) {                 // first reveal dismisses "try clicking" for good
+      revealedAny = true;
+      hideHint(hintClick);
     }
   }
 
@@ -580,10 +571,12 @@
     });
   });
 
-  /* ===== hints (desktop only): "try moving" at 1.25s, "try clicking" at 3s ===== */
+  /* ===== hints (desktop only) ===== */
   if (!isMobile && (hintMove || hintClick)) {
-    firstMoveTimer  = setTimeout(() => showHint(hintMove), 1250);
-    firstClickTimer = setTimeout(() => { if (!allRevealed) showHint(hintClick); }, 3000);
+    // "try moving" appears at 1.25s; hidden while the pointer is over the timeline
+    firstMoveTimer = setTimeout(() => showHint(hintMove), 1250);
+    // "try clicking" appears at 3s and STAYS until the user reveals an image
+    setTimeout(() => { if (!revealedAny) showHint(hintClick); }, 3000);
 
     if (timeline) {
       timeline.addEventListener('mouseenter', engageTimeline);
