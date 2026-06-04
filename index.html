@@ -536,8 +536,9 @@
   const hintMove  = document.getElementById('hint-move');
   const hintClick = document.getElementById('hint-click');
 
-  let revealedAny = false;
-  let firstMoveTimer, idleTimer;
+  const total = entries.length;
+  let revealedCount = 0;
+  let firstMoveTimer, idleTimer, keepClickTimer;
 
   function showHint(el) { if (el) el.classList.add('show'); }
   function hideHint(el) { if (el) el.classList.remove('show'); }
@@ -558,10 +559,18 @@
   function revealEntry(entry) {
     if (entry.classList.contains('revealed')) return;
     entry.classList.add('revealed');
-    if (!revealedAny) {                 // first reveal dismisses "try clicking" for good
-      revealedAny = true;
-      hideHint(hintClick);
+    revealedCount++;
+    if (isMobile) return;               // mobile hint is static/permanent
+    hideHint(hintClick);
+    clearTimeout(keepClickTimer);
+    // more photos left? after 2.5s with no further reveal, nudge "Keep clicking"
+    if (revealedCount < total) {
+      keepClickTimer = setTimeout(() => {
+        if (hintClick) hintClick.textContent = 'Keep clicking the timeline.';
+        showHint(hintClick);
+      }, 2500);
     }
+    // all 7 revealed -> stays hidden for good
   }
 
   entries.forEach((entry, i) => {
@@ -579,7 +588,7 @@
     // "try moving" appears at 1.25s; hidden while the pointer is over the timeline
     firstMoveTimer = setTimeout(() => showHint(hintMove), 1250);
     // "try clicking" appears at 3s and STAYS until the user reveals an image
-    setTimeout(() => { if (!revealedAny) showHint(hintClick); }, 3000);
+    setTimeout(() => { if (revealedCount === 0) showHint(hintClick); }, 3000);
 
     if (timeline) {
       timeline.addEventListener('mouseenter', engageTimeline);
