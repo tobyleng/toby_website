@@ -210,6 +210,7 @@
     color: var(--ink-faint);
     font-variant-numeric: tabular-nums;
   }
+  .mobile-timeline { display: none; }
 
   .row {
     display: grid;
@@ -412,18 +413,84 @@
     .rail {
       position: static;
       height: auto;
+      order: 2;
       border-right: none;
       border-bottom: 1px solid var(--hairline);
       padding: 40px 24px 28px;
     }
     .spine { display: none; }
-    .ledger { padding: 36px 24px 60px; }
+    .ledger { order: 1; padding: 36px 24px 60px; }
     .ledger-head { padding-right: 52px; }
+    .mobile-timeline {
+      display: block;
+      margin: 22px -24px 18px;
+      padding: 0 24px 12px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .mobile-timeline-prompt {
+      margin: 0 0 12px;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+    .mobile-timeline.has-selection .mobile-timeline-prompt { display: none; }
+    .mobile-timeline-choices {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 2px 0 8px;
+      scrollbar-width: none;
+      scroll-snap-type: x proximity;
+    }
+    .mobile-timeline-choices::-webkit-scrollbar { display: none; }
+    .timeline-choice {
+      flex: 0 0 94px;
+      min-height: 72px;
+      padding: 10px 11px;
+      border: 1px solid var(--hairline);
+      border-radius: 5px;
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+      scroll-snap-align: start;
+      text-align: left;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .timeline-choice:active { transform: scale(0.97); }
+    .timeline-choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .timeline-choice.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--bg);
+    }
+    .timeline-choice-num {
+      display: block;
+      margin-bottom: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      opacity: 0.65;
+    }
+    .timeline-choice-title {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
     .row,
     .row.flip {
       grid-template-columns: 1fr;
       gap: 14px;
       padding: 28px 0;
+    }
+    .row,
+    .row.flip { display: none; }
+    .row.mobile-active,
+    .row.flip.mobile-active {
+      display: grid;
+      animation: reveal-chapter 0.28s ease both;
     }
     .row.flip .body { order: 0; }
     .row.flip .photo { order: 0; }
@@ -433,6 +500,11 @@
     .index { flex-direction: row; align-items: baseline; gap: 12px; }
     .num { font-size: 26px; }
     .work-grid { grid-template-columns: 1fr; }
+  }
+
+  @keyframes reveal-chapter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -461,6 +533,7 @@
           <li>Amateur magician</li>
           <li>Brainrotted</li>
           <li>Learning a human flag</li>
+          <li>Content Creator (Partnered with Replit, Naked Nutrition, etc.)</li>
         </ul>
       </div>
 
@@ -498,6 +571,10 @@
     <span class="label" style="margin-bottom:0">Timeline</span>
     <span class="count">07 chapters</span>
   </div>
+  <section class="mobile-timeline" id="mobileTimeline" aria-label="Choose a timeline chapter">
+    <p class="mobile-timeline-prompt">Tap a chapter to reveal the moment.</p>
+    <div class="mobile-timeline-choices" id="mobileTimelineChoices"></div>
+  </section>
 
   <article class="row">
     <div class="index">
@@ -638,6 +715,9 @@
     var line = document.getElementById("spineLine");
     var lastRow = document.getElementById("lastRow");
     var themeToggle = document.getElementById("themeToggle");
+    var mobileTimeline = document.getElementById("mobileTimeline");
+    var mobileChoices = document.getElementById("mobileTimelineChoices");
+    var mobileButtons = [];
 
     function setTheme(dark) {
       document.body.classList.toggle("dark", dark);
@@ -676,6 +756,35 @@
       row.addEventListener("mouseleave", off);
       row.addEventListener("focus", on);
       row.addEventListener("blur", off);
+
+      if (mobileChoices) {
+        var titleText = row.querySelector(".title").childNodes[0].textContent.trim();
+        var choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = "timeline-choice";
+        choice.setAttribute("aria-pressed", "false");
+        var number = document.createElement("span");
+        number.className = "timeline-choice-num";
+        number.textContent = String(i + 1).padStart(2, "0");
+        var title = document.createElement("span");
+        title.className = "timeline-choice-title";
+        title.textContent = titleText;
+        choice.appendChild(number);
+        choice.appendChild(title);
+        choice.addEventListener("click", function () {
+          rows.forEach(function (item, itemIndex) {
+            item.classList.toggle("mobile-active", itemIndex === i);
+          });
+          mobileButtons.forEach(function (button, buttonIndex) {
+            var selected = buttonIndex === i;
+            button.classList.toggle("active", selected);
+            button.setAttribute("aria-pressed", String(selected));
+          });
+          mobileTimeline.classList.add("has-selection");
+        });
+        mobileButtons.push(choice);
+        mobileChoices.appendChild(choice);
+      }
     });
 
     // place each dot at its row's center and size the line to end on chapter 07
