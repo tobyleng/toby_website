@@ -410,21 +410,23 @@
   /* ===== mobile ===== */
   @media (max-width: 900px) {
     body { grid-template-columns: 1fr; }
-    .rail {
-      position: static;
-      height: auto;
-      order: 2;
-      border-right: none;
-      border-bottom: 1px solid var(--hairline);
+    .rail { display: contents; }
+    .head {
+      order: 1;
       padding: 40px 24px 28px;
+      border-bottom: 1px solid var(--hairline);
     }
+    .ledger { display: contents; }
     .spine { display: none; }
-    .ledger { order: 1; padding: 36px 24px 60px; }
-    .ledger-head { padding-right: 52px; }
+    .ledger-head {
+      order: 2;
+      padding: 36px 76px 12px 24px;
+    }
     .mobile-timeline {
       display: block;
-      margin: 22px -24px 18px;
-      padding: 0 24px 12px;
+      order: 3;
+      margin: 0;
+      padding: 16px 24px 20px;
       border-bottom: 1px solid var(--hairline);
     }
     .mobile-timeline-prompt {
@@ -435,25 +437,26 @@
     .mobile-timeline.has-selection .mobile-timeline-prompt { display: none; }
     .mobile-timeline-choices {
       display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding: 2px 0 8px;
-      scrollbar-width: none;
-      scroll-snap-type: x proximity;
+      flex-direction: column;
+      gap: 0;
+      padding: 0;
+      border-left: 1px solid var(--hairline);
     }
-    .mobile-timeline-choices::-webkit-scrollbar { display: none; }
     .timeline-choice {
-      flex: 0 0 94px;
-      min-height: 72px;
-      padding: 10px 11px;
-      border: 1px solid var(--hairline);
-      border-radius: 5px;
-      background: var(--card);
+      width: 100%;
+      min-height: 54px;
+      padding: 10px 14px;
+      border: 0;
+      border-bottom: 1px solid var(--hairline);
+      border-radius: 0;
+      background: transparent;
       color: var(--ink);
       cursor: pointer;
-      scroll-snap-align: start;
       text-align: left;
-      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      align-items: center;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
     }
     .timeline-choice:active { transform: scale(0.97); }
     .timeline-choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -463,21 +466,15 @@
       color: var(--bg);
     }
     .timeline-choice-num {
-      display: block;
-      margin-bottom: 4px;
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.14em;
       opacity: 0.65;
     }
     .timeline-choice-title {
-      display: -webkit-box;
-      overflow: hidden;
       font-size: 12px;
       font-weight: 700;
       line-height: 1.25;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
     }
     .row,
     .row.flip {
@@ -490,6 +487,9 @@
     .row.mobile-active,
     .row.flip.mobile-active {
       display: grid;
+      order: 4;
+      padding-left: 24px;
+      padding-right: 24px;
       animation: reveal-chapter 0.28s ease both;
     }
     .row.flip .body { order: 0; }
@@ -499,7 +499,22 @@
     .shh { filter: none; opacity: 1; }
     .index { flex-direction: row; align-items: baseline; gap: 12px; }
     .num { font-size: 26px; }
+    .facts-block,
+    .contact-block {
+      margin: 0;
+      padding: 32px 24px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .facts-block { order: 5; }
+    .contact-block { order: 6; }
+    .work {
+      order: 7;
+      margin: 0;
+      padding: 32px 24px;
+      border-bottom: 1px solid var(--hairline);
+    }
     .work-grid { grid-template-columns: 1fr; }
+    .foot { order: 8; margin: 0; padding: 24px; }
   }
 
   @keyframes reveal-chapter {
@@ -525,27 +540,26 @@
         <p class="bio">Math kid. Piano player. Built for the standard Asian-kid pipeline: good grades → T20 → corporate life.</p>
         <p class="bio">Instead, I made one YouTube video and the rest is history. Now I'm a 19 year old trying to build great things. Currently in nyc.</p>
       </section>
+    </div>
+  </div>
+  <div class="rail-block facts-block">
+    <div class="label">Fun Facts</div>
+    <ul class="facts">
+      <li>Piano player (currently learning Ballade 4)</li>
+      <li>Amateur magician</li>
+      <li>Brainrotted</li>
+      <li>Learning a human flag</li>
+      <li>Content Creator (Partnered with Replit, Naked Nutrition, etc.)</li>
+    </ul>
+  </div>
 
-      <div class="rail-block">
-        <div class="label">Fun Facts</div>
-        <ul class="facts">
-          <li>Piano player (currently learning Ballade 4)</li>
-          <li>Amateur magician</li>
-          <li>Brainrotted</li>
-          <li>Learning a human flag</li>
-          <li>Content Creator (Partnered with Replit, Naked Nutrition, etc.)</li>
-        </ul>
-      </div>
-
-      <div class="rail-block">
-        <div class="label">Contact</div>
-        <div class="contacts">
-          <a href="https://x.com/tobyjleng" target="_blank" rel="noopener noreferrer">x.com/tobyjleng</a>
-          <a href="https://instagram.com/toby.lengg" target="_blank" rel="noopener noreferrer">instagram.com/toby.lengg</a>
-          <a href="https://linkedin.com/in/tobyleng" target="_blank" rel="noopener noreferrer">linkedin.com/in/tobyleng</a>
-          <a href="mailto:tobyjleng@gmail.com">tobyjleng@gmail.com</a>
-        </div>
-      </div>
+  <div class="rail-block contact-block">
+    <div class="label">Contact</div>
+    <div class="contacts">
+      <a href="https://x.com/tobyjleng" target="_blank" rel="noopener noreferrer">x.com/tobyjleng</a>
+      <a href="https://instagram.com/toby.lengg" target="_blank" rel="noopener noreferrer">instagram.com/toby.lengg</a>
+      <a href="https://linkedin.com/in/tobyleng" target="_blank" rel="noopener noreferrer">linkedin.com/in/tobyleng</a>
+      <a href="mailto:tobyjleng@gmail.com">tobyjleng@gmail.com</a>
     </div>
   </div>
 </aside>
@@ -786,6 +800,7 @@
         mobileChoices.appendChild(choice);
       }
     });
+    if (mobileButtons[0]) mobileButtons[0].click();
 
     // place each dot at its row's center and size the line to end on chapter 07
     function sizeSpine() {
