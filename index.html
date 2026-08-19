@@ -95,13 +95,14 @@
   }
   .contacts a:hover { color: var(--ink-soft); }
 
-  /* ===== spine ===== */
+  /* ===== spine (lives in the ledger, scrolls with the page) ===== */
   .spine {
+    position: absolute;
+    left: 46px;
+    top: 56px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 8px;
-    margin-left: auto;
   }
   .spine-arrow {
     width: 0;
@@ -113,14 +114,9 @@
   }
   .spine-line {
     position: relative;
-    height: 430px; /* JS aligns this so the last dot lands on chapter 07 */
+    height: 430px; /* JS sizes this so the last dot lands on chapter 07 */
     width: 2px;
     background: rgba(17, 17, 16, 0.18);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 14px;
   }
   .spine-fill {
     position: absolute;
@@ -132,26 +128,28 @@
     transition: height 0.15s linear;
   }
   .spine-dot {
-    position: relative;
+    position: absolute;
+    left: 50%;
     z-index: 1;
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: rgba(17, 17, 16, 0.25);
-    flex-shrink: 0;
+    transform: translate(-50%, -50%);
     transition: transform 0.25s ease, background 0.25s ease;
   }
   .spine-dot.reached {
     background: var(--ink);
-    transform: scale(1.35);
+    transform: translate(-50%, -50%) scale(1.35);
   }
-  .spine-dot.hot { transform: scale(1.7); background: var(--ink); }
-  .spine-dot.now.reached { transform: scale(1.8); }
+  .spine-dot.hot { transform: translate(-50%, -50%) scale(1.7); background: var(--ink); }
+  .spine-dot.now.reached { transform: translate(-50%, -50%) scale(1.8); }
 
   /* ===== ledger ===== */
   .ledger {
-    padding: 48px 48px 64px;
-    max-width: 860px;
+    position: relative;
+    padding: 48px 48px 64px 104px;
+    max-width: 920px;
   }
   .ledger-head {
     display: flex;
@@ -425,26 +423,26 @@
         </div>
       </div>
     </div>
-
-    <!-- timeline spine: fills to the hovered chapter, ends on 07 -->
-    <div class="spine" aria-hidden="true">
-      <div class="spine-arrow"></div>
-      <div class="spine-line" id="spineLine">
-        <div class="spine-fill" id="spineFill"></div>
-        <span class="spine-dot"></span>
-        <span class="spine-dot"></span>
-        <span class="spine-dot"></span>
-        <span class="spine-dot"></span>
-        <span class="spine-dot"></span>
-        <span class="spine-dot"></span>
-        <span class="spine-dot now"></span>
-      </div>
-    </div>
   </div>
 </aside>
 
 <!-- ===== Right ledger ===== -->
 <main class="ledger">
+  <!-- timeline spine: scrolls with the chapters, dots aligned to each row -->
+  <div class="spine" aria-hidden="true">
+    <div class="spine-arrow"></div>
+    <div class="spine-line" id="spineLine">
+      <div class="spine-fill" id="spineFill"></div>
+      <span class="spine-dot"></span>
+      <span class="spine-dot"></span>
+      <span class="spine-dot"></span>
+      <span class="spine-dot"></span>
+      <span class="spine-dot"></span>
+      <span class="spine-dot"></span>
+      <span class="spine-dot now"></span>
+    </div>
+  </div>
+
   <div class="ledger-head">
     <span class="label" style="margin-bottom:0">Timeline</span>
     <span class="count">07 chapters</span>
@@ -595,10 +593,11 @@
     var line = document.getElementById("spineLine");
     var lastRow = document.getElementById("lastRow");
 
+    var centers = [];
+
     function activate(i) {
       // fill exactly to the hovered dot's center
-      var dot = dots[i];
-      fill.style.height = Math.round(dot.offsetTop + dot.offsetHeight / 2) + "px";
+      fill.style.height = (centers[i] || 0) + "px";
       dots.forEach(function (d, j) {
         d.classList.toggle("reached", j <= i);
         d.classList.toggle("hot", j === i);
@@ -621,16 +620,22 @@
       row.addEventListener("blur", off);
     });
 
-    // size the spine so its last dot lines up with the Mogging row
+    // place each dot at its row's center and size the line to end on chapter 07
     function sizeSpine() {
-      if (!line || !lastRow || window.innerWidth <= 900) return;
+      if (!line || window.innerWidth <= 900) return;
       var lineTop = line.getBoundingClientRect().top + window.scrollY;
-      var r = lastRow.getBoundingClientRect();
-      var rowCenter = r.top + window.scrollY + r.height / 2;
-      line.style.height = Math.max(200, Math.round(rowCenter - lineTop)) + "px";
+      centers = rows.map(function (row) {
+        var r = row.getBoundingClientRect();
+        return Math.round(r.top + window.scrollY + r.height / 2 - lineTop);
+      });
+      line.style.height = Math.max(200, centers[centers.length - 1]) + "px";
+      dots.forEach(function (d, i) {
+        d.style.top = centers[i] + "px";
+      });
     }
     sizeSpine();
     window.addEventListener("resize", sizeSpine);
+    window.addEventListener("load", sizeSpine);
     setTimeout(sizeSpine, 300);
   })();
 </script>
