@@ -12,7 +12,25 @@
     --ink-faint: #9a978f;
     --card: #ffffff;
     --hairline: rgba(17, 17, 16, 0.12);
+    --line: rgba(17, 17, 16, 0.18);
+    --dot: rgba(17, 17, 16, 0.25);
+    --row-hover: rgba(255, 255, 255, 0.7);
+    --shadow: rgba(17, 17, 16, 0.1);
+    --strong-line: rgba(17, 17, 16, 0.3);
     --mono: "SF Mono", "IBM Plex Mono", ui-monospace, "Menlo", monospace;
+  }
+  body.dark {
+    --bg: #151515;
+    --ink: #f3f2ec;
+    --ink-soft: #bbb9b1;
+    --ink-faint: #77756e;
+    --card: #20201f;
+    --hairline: rgba(243, 242, 236, 0.14);
+    --line: rgba(243, 242, 236, 0.24);
+    --dot: rgba(243, 242, 236, 0.3);
+    --row-hover: rgba(255, 255, 255, 0.06);
+    --shadow: rgba(0, 0, 0, 0.24);
+    --strong-line: rgba(243, 242, 236, 0.35);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +45,7 @@
     display: grid;
     grid-template-columns: 360px 1fr;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
   /* ===== rail ===== */
@@ -38,7 +57,10 @@
     padding: 56px 36px 32px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  .rail::-webkit-scrollbar { display: none; }
   .head {
     display: flex;
     gap: 30px;
@@ -56,6 +78,9 @@
     font-size: 14.5px;
     max-width: 220px;
   }
+  .story { display: grid; gap: 11px; }
+  .story .label { margin-bottom: 0; }
+  .story .bio { font-size: 13.5px; line-height: 1.55; }
   .rail-block { margin-top: 36px; }
   .label {
     font-family: var(--mono);
@@ -91,9 +116,28 @@
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    text-decoration-color: rgba(17, 17, 16, 0.3);
+    text-decoration-color: var(--strong-line);
   }
   .contacts a:hover { color: var(--ink-soft); }
+  .theme-toggle {
+    position: fixed;
+    top: 22px;
+    right: 24px;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--hairline);
+    border-radius: 50%;
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 5px 16px var(--shadow);
+    cursor: pointer;
+    font-size: 19px;
+    line-height: 1;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .theme-toggle:hover { transform: rotate(18deg) scale(1.06); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
   /* ===== spine (lives in the ledger, scrolls with the page) ===== */
   .spine {
@@ -116,7 +160,7 @@
     position: relative;
     height: 430px; /* JS sizes this so the last dot lands on chapter 07 */
     width: 2px;
-    background: rgba(17, 17, 16, 0.18);
+    background: var(--line);
   }
   .spine-fill {
     position: absolute;
@@ -134,7 +178,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(17, 17, 16, 0.25);
+    background: var(--dot);
     transform: translate(-50%, -50%);
     transition: transform 0.25s ease, background 0.25s ease;
   }
@@ -156,7 +200,7 @@
     justify-content: space-between;
     align-items: baseline;
     border-bottom: 2px solid var(--ink);
-    padding-bottom: 12px;
+    padding: 0 56px 12px 0;
   }
   .count {
     font-family: var(--mono);
@@ -179,7 +223,7 @@
   .row.flip { grid-template-columns: 110px 210px 1fr; }
   .row.flip .body { order: 3; }
   .row.flip .photo { order: 2; }
-  .row.hot { background: rgba(255, 255, 255, 0.7); }
+  .row.hot { background: var(--row-hover); }
 
   .index { display: flex; flex-direction: column; gap: 4px; }
   .num {
@@ -289,7 +333,7 @@
     border-radius: 4px;
     border: 1px solid var(--hairline);
     background: var(--card);
-    box-shadow: 0 8px 26px rgba(17, 17, 16, 0.1);
+    box-shadow: 0 8px 26px var(--shadow);
     filter: saturate(0.92);
     opacity: 0;
     transform: rotate(-0.4deg) scale(0.97) translateY(4px);
@@ -321,8 +365,8 @@
   }
   .work-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 34px rgba(17, 17, 16, 0.1);
-    border-color: rgba(17, 17, 16, 0.3);
+    box-shadow: 0 14px 34px var(--shadow);
+    border-color: var(--strong-line);
   }
   .work-kicker {
     display: block;
@@ -373,6 +417,7 @@
     }
     .spine { display: none; }
     .ledger { padding: 36px 24px 60px; }
+    .ledger-head { padding-right: 52px; }
     .row,
     .row.flip {
       grid-template-columns: 1fr;
@@ -395,13 +440,18 @@
 </style>
 </head>
 <body>
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">☾</button>
 
 <!-- ===== Left identity rail ===== -->
 <aside class="rail">
   <div class="head">
     <div>
       <h1 class="name">I'm Toby<br />Leng.</h1>
-      <p class="bio">A 19 year old trying to build great things. Currently in nyc.</p>
+      <section class="story" aria-labelledby="story-title">
+        <div class="label" id="story-title">My Story</div>
+        <p class="bio">Math kid. Piano player. Built for the standard Asian-kid pipeline: good grades → T20 → corporate life.</p>
+        <p class="bio">Instead, I made one YouTube video and the rest is history. Now I'm a 19 year old trying to build great things. Currently in nyc.</p>
+      </section>
 
       <div class="rail-block">
         <div class="label">Fun Facts</div>
@@ -409,7 +459,7 @@
           <li>Piano player (currently learning Ballade 4)</li>
           <li>Amateur magician</li>
           <li>Brainrotted</li>
-          <li>Learning a human flag.</li>
+          <li>Learning a human flag</li>
         </ul>
       </div>
 
@@ -474,7 +524,7 @@
     <div class="body">
       <h2 class="title">The Entree
         <span class="title-logo brand-hk">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-label="Hell's Kitchen"><path d="M5.6 9V3.4L6.5 1l.9 2.4V9H5.6zM11.1 9V3.4L12 1l.9 2.4V9h-1.8zM16.6 9V3.4l.9-2.4.9 2.4V9h-1.8zM4.8 8.2h14.4v1.6H4.8zM11.1 9.8h1.8V24h-1.8z"/><text x="12" y="18" text-anchor="middle" font-size="12" font-weight="800" font-family="Georgia, serif" fill="currentColor" stroke="#f7f7f5" stroke-width="2.4" paint-order="stroke">HK</text></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-label="Hell's Kitchen"><path d="M5.6 9V3.4L6.5 1l.9 2.4V9H5.6zM11.1 9V3.4L12 1l.9 2.4V9h-1.8zM16.6 9V3.4l.9-2.4.9 2.4V9h-1.8zM4.8 8.2h14.4v1.6H4.8zM11.1 9.8h1.8V24h-1.8z"/><text x="12" y="18" text-anchor="middle" font-size="12" font-weight="800" font-family="Georgia, serif" fill="currentColor" stroke="var(--bg)" stroke-width="2.4" paint-order="stroke">HK</text></svg>
         </span>
       </h2>
       <p class="desc">Edited my first viral post gaining over 17M views, the second most viewed Hell's Kitchen video of all time. Now a creator with 50k+ total followers.</p>
@@ -592,6 +642,19 @@
     var fill = document.getElementById("spineFill");
     var line = document.getElementById("spineLine");
     var lastRow = document.getElementById("lastRow");
+    var themeToggle = document.getElementById("themeToggle");
+
+    function setTheme(dark) {
+      document.body.classList.toggle("dark", dark);
+      themeToggle.textContent = dark ? "☀" : "☾";
+      themeToggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      themeToggle.title = dark ? "Switch to light mode" : "Switch to dark mode";
+      localStorage.setItem("toby-theme", dark ? "dark" : "light");
+    }
+    setTheme(localStorage.getItem("toby-theme") === "dark");
+    themeToggle.addEventListener("click", function () {
+      setTheme(!document.body.classList.contains("dark"));
+    });
 
     var centers = [];
 
